@@ -21,9 +21,9 @@ class JS_Class_Diagram {
       foreach ( $files as $file ) {
         $this->set_classes( file_get_contents( $file ) );
       }
-      header( 'Content-Type: text/plain' );
+      // header( 'Content-Type: text/plain' );
       // echo json_encode( $this->classes );
-      echo $this->get_yuml();
+      echo '<img src="http://yuml.me/diagram/class/' . $this->get_yuml() . '">';
     }
   }
 
@@ -95,7 +95,7 @@ class JS_Class_Diagram {
       $yuml[] = "[{$root->name}]";
       $yuml = array_merge( $yuml, $this->get_class_yuml( $root ) );
     }
-    return implode( ', ', $yuml );
+    return implode( ',', $yuml );
   }
 
   private function get_class_yuml( $branch )
