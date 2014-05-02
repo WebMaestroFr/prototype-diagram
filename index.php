@@ -21,40 +21,10 @@ class JS_Class_Diagram {
       foreach ( $files as $file ) {
         $this->set_classes( file_get_contents( $file ) );
       }
+      header( 'Content-Type: text/plain' );
+      // echo json_encode( $this->classes );
       echo $this->get_yuml();
     }
-  }
-
-  private function get_yuml()
-  {
-    $yuml = array();
-    foreach( $this->classes as $root ) {
-      $yuml[] = "[{$root->name}]";
-      $yuml = array_merge( $yuml, $this->get_class_yuml( $root ) );
-    }
-    return implode( ', ', $yuml );
-  }
-
-  private function get_class_yuml( $branch )
-  {
-    $yuml = array();
-    foreach( $branch->classes as $class ) {
-      if ( $class->parent ) {
-        $yuml[] = "[{$class->parent->name}]^-[{$class->name}]";
-      }
-      if ( ! $class->parent || ( $class->parent !== $branch && ! self::in_tree( $class->parent, $branch->classes ) ) ) {
-        $yuml[] = "[{$branch->name}]->[{$class->name}]";
-      }
-      $yuml = array_merge( $yuml, $this->get_class_yuml( $class ) );
-    }
-    return $yuml;
-  }
-
-  private static function in_tree( $class, $branches ) {
-    foreach ( $branches as $branch ) {
-      if ( $class === $branch || self::in_tree( $class, $branch->classes ) ) { return true; }
-    }
-    return false;
   }
 
   private static function list_files( $directory )
@@ -92,6 +62,7 @@ class JS_Class_Diagram {
       $branch = array_shift( $path );
       if ( ! isset( $class->classes[$branch] ) ) {
         $class->classes[$branch] = new JS_Class( $branch );
+        // $class->classes[$branch]->super = $class;
       }
       $class = $class->classes[$branch];
     }
@@ -105,8 +76,41 @@ class JS_Class_Diagram {
       $class = $this->get_class( explode( '.', $match[1] ) );
       if ( isset( $match[2] ) ) {
         $class->parent = $this->get_class( explode( '.', $match[2] ) );
+        // $class->parent->children[] = $class;
       }
     }
+  }
+
+  private static function in_tree( $class, $branches ) {
+    foreach ( $branches as $branch ) {
+      if ( $class === $branch || self::in_tree( $class, $branch->classes ) ) { return true; }
+    }
+    return false;
+  }
+
+  private function get_yuml()
+  {
+    $yuml = array();
+    foreach( $this->classes as $root ) {
+      $yuml[] = "[{$root->name}]";
+      $yuml = array_merge( $yuml, $this->get_class_yuml( $root ) );
+    }
+    return implode( ', ', $yuml );
+  }
+
+  private function get_class_yuml( $branch )
+  {
+    $yuml = array();
+    foreach( $branch->classes as $class ) {
+      if ( $class->parent ) {
+        $yuml[] = "[{$class->parent->name}]^-[{$class->name}]";
+      }
+      if ( ! $class->parent || ( $class->parent !== $branch && ! self::in_tree( $class->parent, $branch->classes ) ) ) {
+        $yuml[] = "[{$branch->name}]->[{$class->name}]";
+      }
+      $yuml = array_merge( $yuml, $this->get_class_yuml( $class ) );
+    }
+    return $yuml;
   }
 
 }
