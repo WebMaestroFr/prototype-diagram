@@ -23,7 +23,8 @@ class JS_Class_Diagram {
       }
       // header( 'Content-Type: text/plain' );
       // echo json_encode( $this->classes );
-      echo '<img src="http://yuml.me/diagram/class/' . $this->get_yuml() . '">';
+      $yuml = $this->get_yuml();
+      echo "<img src='http://yuml.me/diagram/class/{$yuml}' alt='{$yuml}' />";
     }
   }
 
